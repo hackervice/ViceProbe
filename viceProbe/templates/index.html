@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViceProbe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+        .checkbox-container label {
+            flex: 1 1 45%;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .collapsible {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 18px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .collapsible:hover {
+            background-color: #0056b3;
+        }
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        pre {
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .loader-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #007bff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin-right: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-message {
+            font-size: 18px;
+            color: #333;
+        }
+        .export-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ViceProbe</h1>
+        <form id="enumForm" action="/run_enum" method="post">
+            <label for="domain">Enter domain:</label>
+            <input type="text" id="domain" name="domain" autocomplete="off" required>
+            <button type="button" id="selectAllButton">Select All</button>
+            <div class="checkbox-container">
+                <label><input type="checkbox" name="tools" value="subdomain_enum"> Subdomain Enumeration</label>
+                <label><input type="checkbox" name="tools" value="active_subdomain_enum"> Active Subdomain Enumeration</label>
+                <label><input type="checkbox" name="tools" value="webfolder_enum"> Web Folder Enumeration</label>
+                <label><input type="checkbox" name="tools" value="href_enum"> URL Scraping</label>
+                <label><input type="checkbox" name="tools" value="parameter_enum"> Parameter Enumeration</label>
+                <label><input type="checkbox" name="tools" value="tech_enum"> Technology Enumeration</label>
+                <label><input type="checkbox" name="tools" value="gd_enum"> Google Dork Enumeration</label>
+            </div>
+            <button type="submit">Run Enumeration</button>
+        </form>
+
+        <div id="loaderContainer" class="loader-container">
+            <div class="loader" id="loader"></div>
+            <div class="status-message" id="statusMessage">Enumeration in progress...</div>
+        </div>
+
+        {% if subdomain_results %}
+            <button type="button" class="collapsible">Subdomain Enumeration Results</button>
+            <div class="content">
+                <pre>{{ subdomain_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if active_subdomain_results %}
+            <button type="button" class="collapsible">Active Subdomain Enumeration Results</button>
+            <div class="content">
+                <pre>{{ active_subdomain_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if webfolder_results %}
+            <button type="button" class="collapsible">Web Folder Enumeration Results</button>
+            <div class="content">
+                <pre>{{ webfolder_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if href_inside_scope_results %}
+            <button type="button" class="collapsible">URLs Inside Scope Results</button>
+            <div class="content">
+                <pre>{{ href_inside_scope_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if href_miscellaneous_results %}
+            <button type="button" class="collapsible">Miscellaneous URLs Results</button>
+            <div class="content">
+                <pre>{{ href_miscellaneous_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if parameter_results %}
+            <button type="button" class="collapsible">Parameter Enumeration Results</button>
+            <div class="content">
+                <pre>{{ parameter_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if tech_results %}
+            <button type="button" class="collapsible">Technology Enumeration Results</button>
+            <div class="content">
+                <pre>{{ tech_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if gd_results %}
+            <button type="button" class="collapsible">Google Dork Enumeration Results</button>
+            <div class="content">
+                <pre>{{ gd_results }}</pre>
+            </div>
+        {% endif %}
+
+        {% if subdomain_results or active_subdomain_results or webfolder_results or href_inside_scope_results or href_miscellaneous_results or parameter_results or tech_results or gd_results %}
+            <div class="export-buttons">
+                <button id="exportPdfButton" type="button">Export as PDF</button>
+                <button id="exportCsvButton" type="button">Export as CSV</button>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var coll = document.getElementsByClassName("collapsible");
+            for (var i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var content = this.nextElementSibling;
+                    if (content.style.display === "block") {
+                        content.style.display = "none";
+                    } else {
+                        content.style.display = "block";
+                    }
+                });
+            }
+
+            var selectAllButton = document.getElementById('selectAllButton');
+            var allCheckboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
+            var allSelected = false;
+
+            selectAllButton.addEventListener('click', function() {
+                allSelected = !allSelected; // Toggle the state
+                allCheckboxes.forEach(function(checkbox) {
+                    checkbox.checked = allSelected;
+                });
+                selectAllButton.textContent = allSelected ? 'Deselect All' : 'Select All';
+            });
+
+            var form = document.getElementById('enumForm');
+            var loaderContainer = document.getElementById('loaderContainer');
+            form.addEventListener('submit', function() {
+                loaderContainer.style.display = 'flex';
+            });
+
+            document.getElementById('exportPdfButton').addEventListener('click', function() {
+                window.location.href = '/export/pdf';
+            });
+
+            document.getElementById('exportCsvButton').addEventListener('click', function() {
+                window.location.href = '/export/csv';
+            });
+        });
+    </script>
+</body>
+</html>
